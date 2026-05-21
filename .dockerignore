@@ -1,0 +1,6 @@
+/.cargo
+/.git
+/.dockerignore
+/build
+/target
+/tests

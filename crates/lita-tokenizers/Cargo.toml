@@ -1,0 +1,33 @@
+[package]
+name = "lita-tokenizers"
+version = "0.1.0"
+
+description = "High-level APIs to utilize tokenizers that are working on the LiTA app."
+
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[features]
+default = ["decode", "kytea", "mecab"]
+
+decode = ["tokenizers-utils/decode"]
+
+kytea = ["dep:tokenizers-kytea"]
+mecab = ["dep:tokenizers-mecab"]
+
+[dependencies]
+tokenizers-core.workspace = true
+tokenizers-utils = { workspace = true, features = ["tokio-io", "tokio-fs"] }
+
+tokenizers-kytea = { workspace = true, optional = true }
+tokenizers-mecab = { workspace = true, optional = true }
+tokenizers-whitespace = { workspace = true }
+
+futures-util.workspace = true
+
+[dependencies.tokio]
+workspace = true
+features = ["fs", "io-std", "io-util"]

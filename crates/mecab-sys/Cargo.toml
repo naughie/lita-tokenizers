@@ -1,0 +1,17 @@
+[package]
+name = "mecab-sys"
+version = "0.1.0"
+
+description = "FFI binding and safe wrappers of MeCab"
+
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+bitflags = "2.11"
+
+[build-dependencies]
+cc = { version = "1.2", features = ["parallel"] }

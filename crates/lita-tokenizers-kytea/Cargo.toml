@@ -1,0 +1,19 @@
+[package]
+name = "lita-tokenizers-kytea"
+version = "0.1.0"
+
+description = "The implementation of lita-tokenizers-core for kytea-sys."
+
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+tokenizers-core.workspace = true
+tokenizers-utils = { workspace = true, features = ["str"] }
+kytea-sys.workspace = true
+
+escaped-delimiter.workspace = true
+simdutf8.workspace = true

@@ -1,0 +1,8 @@
+language: cpp
+sudo: false
+
+compiler:
+  - clang
+  - gcc
+
+script: autoreconf -i && ./configure && make && make check

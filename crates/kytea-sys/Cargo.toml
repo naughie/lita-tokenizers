@@ -1,0 +1,21 @@
+[package]
+name = "kytea-sys"
+version = "0.1.0"
+
+description = "FFI binding and safe wrappers of KyTea"
+
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+
+[dev-dependencies]
+flate2 = "1.1"
+blake3 = "1.8"
+tempfile = "3"
+
+[build-dependencies]
+cc = { version = "1.2", features = ["parallel"] }

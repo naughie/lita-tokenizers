@@ -1,0 +1,44 @@
+[package]
+name = "lita-tokenizers-utils"
+version = "0.1.0"
+
+description = "Exposes the high-level APIs of lita-tokenizers-core."
+
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[features]
+default = ["str", "write"]
+
+str = []
+decode = ["dep:encoding_rs", "dep:unicode-bom"]
+
+write = ["dep:memchr", "dep:unicode-normalization"]
+sync-io = ["write"]
+async-io = ["write", "dep:futures-io", "futures-util/io"]
+tokio-io = ["write", "tokio/io-util"]
+
+sync-fs = ["sync-io"]
+tokio-fs = ["tokio-io", "tokio/fs"]
+smol-fs = ["async-io", "dep:async-fs", "dep:futures-util"]
+
+[dependencies]
+tokenizers-core.workspace = true
+
+memchr = { workspace = true, optional = true }
+
+encoding_rs = { version = "0.8", optional = true }
+unicode-bom = { version = "2.0", optional = true }
+unicode-normalization = { version = "0.1", optional = true }
+
+async-fs = { workspace = true, optional = true }
+futures-io = { workspace = true, optional = true }
+futures-util = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+futures-executor.workspace = true

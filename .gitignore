@@ -1,0 +1,5 @@
+/target
+/.cargo
+/tests/kytea/model.bin
+/tests/kytea/model.bin.checksum
+/tests/kytea/model.bin.lock

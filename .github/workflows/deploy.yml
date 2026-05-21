@@ -1,0 +1,26 @@
+name: GitHub Actions test
+run-name: Testing GitHub Actions
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Build Docker image
+        run: ./build/build.sh
+
+      - name: Create GitHub Release and Upload Asset
+        uses: softprops/action-gh-release@v3
+        if: github.ref_type == 'tag'
+        with:
+          files: ./lita-tokenizers-cli

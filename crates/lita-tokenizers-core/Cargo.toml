@@ -1,0 +1,13 @@
+[package]
+name = "lita-tokenizers-core"
+version = "0.1.0"
+
+description = "Core traits and configurations for LiTA tokenizers"
+
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
