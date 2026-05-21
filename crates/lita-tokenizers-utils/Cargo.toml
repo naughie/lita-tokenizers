@@ -1,6 +1,6 @@
 [package]
 name = "lita-tokenizers-utils"
-version = "0.1.0"
+version = "0.1.1"
 
 description = "Exposes the high-level APIs of lita-tokenizers-core."
 
@@ -19,7 +19,7 @@ default = ["str", "write"]
 str = []
 decode = ["dep:encoding_rs", "dep:unicode-bom"]
 
-write = ["dep:memchr", "dep:unicode-normalization"]
+write = ["dep:unicode-normalization"]
 sync-io = ["write"]
 async-io = ["write", "dep:futures-io", "futures-util/io"]
 tokio-io = ["write", "tokio/io-util"]
@@ -31,7 +31,7 @@ smol-fs = ["async-io", "dep:async-fs", "dep:futures-util"]
 [dependencies]
 tokenizers-core.workspace = true
 
-memchr = { workspace = true, optional = true }
+memchr.workspace = true
 
 encoding_rs = { version = "0.8", optional = true }
 unicode-bom = { version = "2.0", optional = true }
