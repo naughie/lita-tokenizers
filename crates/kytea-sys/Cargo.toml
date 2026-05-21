@@ -4,6 +4,8 @@ version = "0.1.0"
 
 description = "FFI binding and safe wrappers of KyTea"
 
+exclude = ["./kytea-src/data/model.bin.gz"]
+
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
