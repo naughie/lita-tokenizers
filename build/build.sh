@@ -18,4 +18,11 @@ mkdir -p "${__dist_dir}"
 docker cp "${__container_name}:/lita-tokenizers-cli" "${__dist_dir}/lita-tokenizers-cli"
 docker rm "${__container_name}"
 
+mkdir -p "${__dist_dir}/license/kytea"
+mkdir -p "${__dist_dir}/license/lita-tokenizers-cli"
+mkdir -p "${__dist_dir}/license/mecab"
+cp ./LICENSE-APACHE ./LICENSE-MIT "${__dist_dir}/license/lita-tokenizers-cli"
+cp ./crates/kytea-sys/kytea-src/COPYING "${__dist_dir}/license/kytea"
+cp ./crates/mecab-sys/mecab-src/COPYING ./crates/mecab-sys/mecab-src/BSD "${__dist_dir}/license/mecab"
+
 tar czf "${__asset}" "${__dist_dir}"
