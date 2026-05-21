@@ -7,11 +7,11 @@ This part is effectively no more than the compatibility layer between the comman
 
 ## Usage
 
-First, download the pre-compiled binary from the Release page.
+First, download the pre-compiled binary from the [Release page](https://github.com/naughie/lita-tokenizers/releases/latest).
 Or, build the binary from the source:
 
 ```
-$ cargo build --release -p lita-tokenizers-cli
+$ cargo install lita-tokenizers-cli
 ```
 
 The manual build may require the C++ compiler.
