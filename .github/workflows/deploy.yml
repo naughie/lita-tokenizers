@@ -1,26 +1,50 @@
-name: GitHub Actions test
-run-name: Testing GitHub Actions
+name: GitHub Actions to build CLI
+run-name: Building lita-tokenizers-cli
 on:
   push:
     tags:
       - 'v*'
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-musl
+          - x86_64-unknown-linux-gnu
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
     
-    permissions:
-      contents: write 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Build Docker image
-        run: ./build/build.sh
+      - name: Build and package binary
+        run: ./build/build.sh ${{ matrix.target }}
 
-      - name: Create GitHub Release and Upload Asset
+      - name: Upload tarball artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: package-${{ matrix.target }}
+          path: ./lita-tokenizers-cli-${{ matrix.target }}.tar.gz
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+
+    steps:
+      - name: Download all packages
+        uses: actions/download-artifact@v8
+        with:
+          pattern: package-*
+          path: ./release-assets
+          merge-multiple: true
+
+      - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
         with:
-          files: ./lita-tokenizers-cli
+          files: ./release-assets/*.tar.gz
