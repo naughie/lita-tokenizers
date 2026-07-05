@@ -28,9 +28,10 @@
 mod error;
 pub use error::Error;
 
-mod common;
+pub mod common;
+#[cfg(feature = "tokio")]
+pub use common::sync::{tokenize, tokenize_stream};
 pub use common::{Input, Output, TokenizerError};
-pub use common::{tokenize, tokenize_stream};
 
 #[cfg(feature = "kytea")]
 pub mod kytea;

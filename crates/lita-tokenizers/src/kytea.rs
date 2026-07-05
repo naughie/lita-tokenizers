@@ -65,7 +65,8 @@ impl<O: TagOrder> From<TokenizerError<KyTeaStreamBuilder<'_, O>>> for Error {
     }
 }
 
-async fn run_dispatched(
+#[cfg(feature = "tokio")]
+async fn run_dispatched_tokio(
     input: Input<'_>,
     output: Output<'_>,
     charset: Charset,
@@ -75,7 +76,22 @@ async fn run_dispatched(
     let mut tok = tokenizer(model, ord)?;
     let mut tok = tok.builder().map_err(Error::KyTea)?;
 
-    common::tokenize(&mut tok, input, output, charset).await?;
+    common::tokio::tokenize(&mut tok, input, output, charset).await?;
+
+    Ok(())
+}
+
+fn run_dispatched_sync(
+    input: Input<'_>,
+    output: Output<'_>,
+    charset: Charset,
+    model: &Path,
+    ord: impl TagOrder,
+) -> Result<(), Error> {
+    let mut tok = tokenizer(model, ord)?;
+    let mut tok = tok.builder().map_err(Error::KyTea)?;
+
+    common::sync::tokenize(&mut tok, input, output, charset)?;
 
     Ok(())
 }
@@ -91,7 +107,8 @@ pub fn tokenizer<O: TagOrder>(model: &Path, ord: O) -> Result<KyTea<O>, Error> {
     Ok(tok)
 }
 
-/// Executes [`tokenize()`](crate::tokenize()) with KyTea initialized by [`tokenizer()`].
+/// Executes [`tokenize()`](common::tokio::tokenize()) with KyTea initialized by [`tokenizer()`].
+#[cfg(feature = "tokio")]
 pub async fn run(
     input: Input<'_>,
     output: Output<'_>,
@@ -100,9 +117,25 @@ pub async fn run(
     tag: TagIndex<'_>,
 ) -> Result<(), Error> {
     match tag {
-        TagIndex::Asis => run_dispatched(input, output, charset, model, Noop).await,
+        TagIndex::Asis => run_dispatched_tokio(input, output, charset, model, Noop).await,
         TagIndex::Specified(index) => {
-            run_dispatched(input, output, charset, model, Selected { index }).await
+            run_dispatched_tokio(input, output, charset, model, Selected { index }).await
+        }
+    }
+}
+
+/// Executes [`tokenize()`](common::sync::tokenize()) with KyTea initialized by [`tokenizer()`].
+pub fn run_sync(
+    input: Input<'_>,
+    output: Output<'_>,
+    charset: Charset,
+    model: &Path,
+    tag: TagIndex<'_>,
+) -> Result<(), Error> {
+    match tag {
+        TagIndex::Asis => run_dispatched_sync(input, output, charset, model, Noop),
+        TagIndex::Specified(index) => {
+            run_dispatched_sync(input, output, charset, model, Selected { index })
         }
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "lita-tokenizers-cli"
-version = "0.1.0"
+version = "0.1.1"
 
 description = "CLI for LiTA tokenizers."
 
@@ -19,7 +19,7 @@ kytea = ["tokenizers-api/kytea"]
 mecab = ["tokenizers-api/mecab"]
 
 [dependencies]
-tokenizers-api.workspace = true
+tokenizers-api = { workspace = true, features = ["tokio"] }
 
 anyhow = "1"
 clap = { version = "4.6", features = ["derive"] }

@@ -18,12 +18,23 @@ impl From<TokenizerError<Whitespace>> for Error {
     }
 }
 
-/// Executes [`tokenize()`](crate::tokenize()) with whitespace tokenizer
+/// Executes [`tokenize()`](common::tokio::tokenize()) with whitespace tokenizer
 /// initialized by [`tokenizer()`].
+#[cfg(feature = "tokio")]
 pub async fn run(input: Input<'_>, output: Output<'_>, charset: Charset) -> Result<(), Error> {
     let mut tok = Whitespace;
 
-    common::tokenize(&mut tok, input, output, charset).await?;
+    common::tokio::tokenize(&mut tok, input, output, charset).await?;
+
+    Ok(())
+}
+
+/// Executes [`tokenize()`](common::sync::tokenize()) with whitespace tokenizer
+/// initialized by [`tokenizer()`].
+pub fn run_sync(input: Input<'_>, output: Output<'_>, charset: Charset) -> Result<(), Error> {
+    let mut tok = Whitespace;
+
+    common::sync::tokenize(&mut tok, input, output, charset)?;
 
     Ok(())
 }
