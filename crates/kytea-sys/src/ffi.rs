@@ -61,12 +61,28 @@ pub(crate) enum CorpusFormat {
     Tags,
 }
 
+#[repr(u8)]
+pub(crate) enum ModelFormat {
+    Binary = b'B',
+    Text = b'T',
+    Unknown = b'U',
+}
+
 unsafe extern "C" {
     pub(crate) fn kytea_free_err_message(err: *const c_char);
 
     pub(crate) fn kytea_model_new() -> *mut c_void;
     pub(crate) fn kytea_model_delete(kytea: *mut c_void);
-    pub(crate) fn kytea_model_read(kytea: *mut c_void, model: *const c_char) -> Err;
+    pub(crate) fn kytea_model_read_path(
+        kytea: *mut c_void,
+        model: *const c_char,
+        format: ModelFormat,
+    ) -> Err;
+    pub(crate) fn kytea_model_read_stream(
+        kytea: *mut c_void,
+        model: *mut c_void,
+        format: ModelFormat,
+    ) -> Err;
     pub(crate) fn kytea_model_sanity_train(kytea: *mut c_void) -> c_int;
     pub(crate) fn kytea_model_prepare_train(kytea: *mut c_void, output: *mut c_void) -> c_int;
     pub(crate) fn kytea_model_config(kytea: *mut c_void) -> *mut c_void;
@@ -94,6 +110,9 @@ unsafe extern "C" {
     pub(crate) fn kytea_fstream_new_path_out(path: *const c_char, append: bool) -> FileResult;
     pub(crate) fn kytea_fstream_delete(file: *mut c_void);
     pub(crate) fn kytea_fstream_flush(file: *mut c_void) -> FileResult;
+
+    pub(crate) fn kytea_ispanstream_new(ptr: *const c_char, len: usize) -> *mut c_void;
+    pub(crate) fn kytea_ispanstream_delete(stream: *mut c_void);
 
     pub(crate) fn kytea_model_corpus(
         kytea: *mut c_void,

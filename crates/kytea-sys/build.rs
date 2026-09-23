@@ -51,7 +51,7 @@ fn compile() -> Result<(), Error> {
 
     cc::Build::new()
         .cpp(true)
-        .std("c++20")
+        .std("c++23")
         .files(lib_src)
         .file(&src)
         .include(&include)

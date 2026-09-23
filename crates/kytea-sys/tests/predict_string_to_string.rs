@@ -1,4 +1,4 @@
-use kytea_sys::{CorpusFormat, KyTea, StringStream};
+use kytea_sys::{CorpusFormat, KyTea, ModelFormat, StringStream};
 
 mod common;
 
@@ -7,7 +7,7 @@ fn predict() {
     let model_path = common::get_and_setup_model_path().unwrap();
     let mut model = KyTea::new();
 
-    model.read_model(&model_path).unwrap();
+    model.read_model(&model_path, ModelFormat::Unknown).unwrap();
 
     model
         .config()

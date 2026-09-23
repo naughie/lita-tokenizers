@@ -1,7 +1,10 @@
 #include <kytea/kytea.h>
 #include <kytea/corpus-io.h>
+#include <kytea/model-io.h>
 
 #include <iostream>
+#include <span>
+#include <spanstream>
 #include <sstream>
 #include <string_view>
 #include <fstream>
@@ -10,12 +13,12 @@
 #include <exception>
 #include <cstring>
 
-using std::iostream, std::fstream, std::stringstream;
+using std::iostream, std::fstream, std::stringstream, std::ispanstream;
 using std::exception;
 
 using kytea::Kytea, kytea::KyteaConfig, kytea::KyteaSentence;
 
-using kytea::CorpusIO, kytea::CorpusFormat;
+using kytea::CorpusIO, kytea::CorpusFormat, kytea::ModelIO;
 
 extern "C" {
     typedef struct {
@@ -49,10 +52,22 @@ extern "C" {
         delete kytea;
     }
 
-    Err kytea_model_read(Kytea* kytea, const char* model) {
+    Err kytea_model_read_path(Kytea* kytea, const char* model, ModelIO::Format format) {
         auto err = kytea_null_err();
         try {
-            kytea->readModel(model);
+            kytea->readModel(model, format);
+            return err;
+        }
+        catch (const exception& e) {
+            err = kytea_err_message(e);
+            return err;
+        }
+    }
+
+    Err kytea_model_read_stream(Kytea* kytea, iostream& stream, ModelIO::Format format) {
+        auto err = kytea_null_err();
+        try {
+            kytea->readModel(stream, format);
             return err;
         }
         catch (const exception& e) {
@@ -206,6 +221,14 @@ extern "C" {
             ret.err = kytea_err_message(e);
             return ret;
         }
+    }
+
+    ispanstream* kytea_ispanstream_new(const char* ptr, size_t len) {
+        return new ispanstream(std::span<const char>(ptr, len));
+    }
+
+    void kytea_ispanstream_delete(ispanstream* stream) {
+        delete stream;
     }
 
     CorpusIO* kytea_model_corpus(Kytea* kytea, iostream* corpus, bool is_output) {

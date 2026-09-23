@@ -10,12 +10,12 @@
 //!
 //! ```
 //! # fn analyze() {
-//! use kytea_sys::{CorpusFormat, KyTea, StringStream};
+//! use kytea_sys::{CorpusFormat, KyTea, ModelFormat, StringStream};
 //!
 //! let model_path = c"/path/to/your/kytea/model";
 //! let mut model = KyTea::new();
 //!
-//! model.read_model(model_path).unwrap();
+//! model.read_model(model_path, ModelFormat::Unknown).unwrap();
 //!
 //! model.config().set_training(false).set_input_format(CorpusFormat::Raw);
 //!
@@ -38,12 +38,12 @@
 //!
 //! ```
 //! # fn analyze() {
-//! use kytea_sys::{CorpusFormat, KyTea, Fstream};
+//! use kytea_sys::{CorpusFormat, KyTea, ModelFormat, Fstream};
 //!
 //! let model_path = c"/path/to/your/kytea/model";
 //! let mut model = KyTea::new();
 //!
-//! model.read_model(model_path).unwrap();
+//! model.read_model(model_path, ModelFormat::Unknown).unwrap();
 //!
 //! model.config().set_training(false).set_input_format(CorpusFormat::Raw);
 //!
@@ -78,12 +78,12 @@ use std::ops::ControlFlow;
 ///
 /// ```
 /// # fn analyze() {
-/// use kytea_sys::{CorpusFormat, KyTea, StringStream};
+/// use kytea_sys::{CorpusFormat, KyTea, ModelFormat, StringStream};
 ///
 /// let model_path = c"/path/to/your/kytea/model";
 /// let mut model = KyTea::new();
 ///
-/// model.read_model(model_path).unwrap();
+/// model.read_model(model_path, ModelFormat::Unknown).unwrap();
 ///
 /// model.config().set_training(false).set_input_format(CorpusFormat::Raw);
 ///
@@ -105,12 +105,12 @@ use std::ops::ControlFlow;
 ///
 /// ```
 /// # fn analyze() {
-/// use kytea_sys::{CorpusFormat, KyTea, Fstream};
+/// use kytea_sys::{CorpusFormat, KyTea, ModelFormat, Fstream};
 ///
 /// let model_path = c"/path/to/your/kytea/model";
 /// let mut model = KyTea::new();
 ///
-/// model.read_model(model_path).unwrap();
+/// model.read_model(model_path, ModelFormat::Unknown).unwrap();
 ///
 /// model.config().set_training(false).set_input_format(CorpusFormat::Raw);
 ///
@@ -157,9 +157,31 @@ impl KyTea {
     }
 
     /// Reads a KyTea model from the specified file path.
-    pub fn read_model(&mut self, model: &CStr) -> Result<(), IoError> {
+    pub fn read_model(&mut self, model: &CStr, format: ModelFormat) -> Result<(), IoError> {
+        let format = match format {
+            ModelFormat::Binary => ffi::ModelFormat::Binary,
+            ModelFormat::Text => ffi::ModelFormat::Text,
+            ModelFormat::Unknown => ffi::ModelFormat::Unknown,
+        };
         unsafe {
-            let err = ffi::kytea_model_read(self.inner, model.as_ptr());
+            let err = ffi::kytea_model_read_path(self.inner, model.as_ptr(), format);
+            err.to_io()
+        }
+    }
+
+    /// Reads a KyTea model from the specified file path.
+    pub fn read_model_from_stream<Mod: Stream>(
+        &mut self,
+        model: &mut Mod,
+        format: ModelFormat,
+    ) -> Result<(), IoError> {
+        let format = match format {
+            ModelFormat::Binary => ffi::ModelFormat::Binary,
+            ModelFormat::Text => ffi::ModelFormat::Text,
+            ModelFormat::Unknown => ffi::ModelFormat::Unknown,
+        };
+        unsafe {
+            let err = ffi::kytea_model_read_stream(self.inner, model.as_stream().inner, format);
             err.to_io()
         }
     }
@@ -386,6 +408,17 @@ pub enum DebugLevel {
     Full,
 }
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ModelFormat {
+    /// Binary file.
+    Binary,
+    /// Text file.
+    Text,
+    /// Either `Binary` or `Text`.
+    #[default]
+    Unknown,
+}
+
 /// Supported corpus formats for KyTea.
 ///
 /// Defaults to `Raw` for input and `Full` for output.
@@ -593,6 +626,46 @@ impl Drop for Fstream {
             if !self.inner.is_null() {
                 ffi::kytea_fstream_delete(self.inner);
             }
+        }
+    }
+}
+
+/// A span stream for KyTea.
+/// It wraps C++ `std::ispanstream`.
+pub struct IspanStream<'a> {
+    inner: *mut c_void,
+    _marker: PhantomData<&'a ()>,
+}
+
+impl<'a> IspanStream<'a> {
+    /// Creates a new empty [`IspanStream`].
+    pub fn new(buf: &'a [u8]) -> Self {
+        unsafe {
+            let inner = ffi::kytea_ispanstream_new(buf.as_ptr() as *const i8, buf.len());
+            debug_assert!(!inner.is_null());
+            Self {
+                inner,
+                _marker: PhantomData,
+            }
+        }
+    }
+}
+
+impl Drop for IspanStream<'_> {
+    fn drop(&mut self) {
+        unsafe {
+            if !self.inner.is_null() {
+                ffi::kytea_ispanstream_delete(self.inner);
+            }
+        }
+    }
+}
+
+impl Stream for IspanStream<'_> {
+    fn as_stream(&mut self) -> IoStream<'_> {
+        IoStream {
+            inner: self.inner,
+            _marker: PhantomData,
         }
     }
 }

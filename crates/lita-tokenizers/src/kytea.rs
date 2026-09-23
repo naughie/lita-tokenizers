@@ -98,11 +98,13 @@ fn run_dispatched_sync(
 
 /// Initializes the [KyTea model](tokenizers_kytea::sys::KyTea) and reads the model.
 pub fn tokenizer<O: TagOrder>(model: &Path, ord: O) -> Result<KyTea<O>, Error> {
+    use tokenizers_kytea::sys::ModelFormat;
+
     let model =
         CString::new(model.as_os_str().as_encoded_bytes()).map_err(Error::KyTeaModelPath)?;
     let mut tok = KyTea::new(ord);
     tok.model()
-        .read_model(&model)
+        .read_model(&model, ModelFormat::Unknown)
         .map_err(Error::KyTeaModelRead)?;
     Ok(tok)
 }

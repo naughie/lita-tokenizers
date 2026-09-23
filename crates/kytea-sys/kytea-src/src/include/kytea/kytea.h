@@ -19,6 +19,8 @@
 
 #include <kytea/kytea-config.h>
 #include <kytea/kytea-struct.h>
+#include <kytea/model-io.h>
+#include <iostream>
 #include <vector>
 
 namespace kytea  {
@@ -70,6 +72,11 @@ public:
     // Read a model from the file fileName. Character encoding,
     // settings, and other information will be read automatically.
     void readModel(const char* fileName);
+    void readModel(const char* fileName, ModelIO::Format format);
+
+    // Read a model from the stream. Character encoding,
+    // settings, and other information will be read automatically.
+    void readModel(std::iostream & str, ModelIO::Format format);
 
     // Writes a model representing the current instance to the
     //  file fileName. The model will be of the type specified
@@ -130,6 +137,7 @@ public:
     void checkEqual(const Kytea & rhs);
 
 private:
+    void readModelImpl(ModelIO* modin);
 
     // functions to create dictionaries
     void buildVocabulary();

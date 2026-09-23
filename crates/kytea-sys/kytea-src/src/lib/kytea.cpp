@@ -841,13 +841,7 @@ void Kytea::writeModel(const char* fileName) {
 
 }
 
-void Kytea::readModel(const char* fileName) {
-    
-    if(config_->getDebug() > 0)
-        cerr << "Reading model from " << fileName;
-
-    
-    ModelIO * modin = ModelIO::createIO(fileName,ModelIO::FORMAT_UNKNOWN, false, *config_);
+void Kytea::readModelImpl(ModelIO* modin) {
     util_ = config_->getStringUtil();
 
     modin->readConfig(*config_);
@@ -877,6 +871,25 @@ void Kytea::readModel(const char* fileName) {
         cerr << " done!" << endl;
 }
 
+void Kytea::readModel(const char* fileName, ModelIO::Format format) {
+    if(config_->getDebug() > 0)
+        cerr << "Reading model from " << fileName;
+
+    ModelIO * modin = ModelIO::createIO(fileName, format, false, *config_);
+    readModelImpl(modin);
+}
+
+void Kytea::readModel(const char* fileName) {
+    readModel(fileName, ModelIO::FORMAT_UNKNOWN);
+}
+
+void Kytea::readModel(iostream & str, ModelIO::Format format) {
+    if(config_->getDebug() > 0)
+        cerr << "Reading model from stream";
+
+    ModelIO * modin = ModelIO::createIO(str, format, false, *config_);
+    readModelImpl(modin);
+}
 
 ////////////////////////
 // Analysis functions //

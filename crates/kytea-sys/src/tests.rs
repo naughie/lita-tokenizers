@@ -75,7 +75,65 @@ fn tokenize() {
         .set_word_bound(c" ")
         .set_input_format(CorpusFormat::Raw);
 
-    model.read_model(model_path).unwrap();
+    model.read_model(model_path, ModelFormat::Unknown).unwrap();
+
+    let mut input = StringStream::new();
+    input.push("すもももももももものうち．\n");
+    input.push("すもももももももものうち．\n");
+    input.push("すもももももももものうち．\n");
+
+    let mut output = StringStream::new();
+
+    let mut ctx = model.context(&mut input, &mut output).unwrap();
+    while ctx.predict().unwrap().is_continue() {}
+
+    let bytes = output.as_bytes();
+    let expected = [
+        "すもも/名詞/すもも",
+        "も/助詞/も",
+        "も/助詞/も",
+        "も/助詞/も",
+        "も/助詞/も",
+        "も/助詞/も",
+        "もの/名詞/もの",
+        "うち/名詞/うち",
+        "．/補助記号/。\n",
+    ]
+    .join(" ")
+    .repeat(3);
+
+    assert_eq!(
+        bytes,
+        expected.as_bytes(),
+        "prediction failed: {}",
+        String::from_utf8_lossy(bytes)
+    );
+}
+
+#[test]
+fn tokenize_inmemory_model() {
+    let model_path = {
+        let path = model_path();
+        setup_model(&path).unwrap();
+
+        path
+    };
+
+    let mut model = KyTea::new();
+
+    model
+        .config()
+        .set_debug(DebugLevel::Silent)
+        .set_training(false)
+        .set_word_bound(c" ")
+        .set_input_format(CorpusFormat::Raw);
+
+    let model_content = std::fs::read(&model_path).unwrap();
+    let mut model_stream = IspanStream::new(&model_content);
+
+    model
+        .read_model_from_stream(&mut model_stream, ModelFormat::Binary)
+        .unwrap();
 
     let mut input = StringStream::new();
     input.push("すもももももももものうち．\n");
@@ -113,8 +171,16 @@ fn tokenize() {
 #[test]
 fn read_model_err() {
     let mut model = KyTea::new();
-    assert!(model.read_model(c"non_existing_model").is_err());
+    assert!(
+        model
+            .read_model(c"non_existing_model", ModelFormat::Unknown)
+            .is_err()
+    );
 
     let mut model = KyTea::new();
-    assert!(model.read_model(c"./Cargo.toml").is_err());
+    assert!(
+        model
+            .read_model(c"./Cargo.toml", ModelFormat::Unknown)
+            .is_err()
+    );
 }

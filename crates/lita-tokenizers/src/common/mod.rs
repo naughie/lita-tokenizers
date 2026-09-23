@@ -19,7 +19,12 @@ use super::Error;
 /// The only usage of it is the trait bound of functions in this module (like [`tokenize()`]):
 ///
 /// ```no_run
+/// # use lita_tokenizers::{TokenizerError, Error, core::TokenStreamBuilder};
+/// # fn dummy<T>()
+/// # where
+/// # T: TokenStreamBuilder,
 /// TokenizerError<T>: Into<Error>,
+/// # {}
 /// ```
 pub struct TokenizerError<T: TokenStreamBuilder>(pub T::Error);
 
