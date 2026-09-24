@@ -1,71 +1,16 @@
 use super::*;
 
-use std::ffi::CString;
-use std::io::Result as IoResult;
-use std::path::{Path, PathBuf};
-
-fn model_path() -> PathBuf {
-    let crate_root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    crate_root
-        .join("../../tests/kytea")
-        .canonicalize()
-        .unwrap()
-        .join("model.bin")
-}
-
-fn setup_model(unpacked_path: &Path) -> IoResult<()> {
-    use flate2::read::GzDecoder;
-
-    use std::fs::File;
-    use std::io::BufReader;
-
-    let gz_path = unpacked_path.with_added_extension("gz");
-    let ch_path = unpacked_path.with_added_extension("checksum");
-
-    let lock_path = unpacked_path.with_added_extension("lock");
-
-    let bytes = {
-        use std::io::Read as _;
-
-        let mut bytes = Vec::new();
-        let mut gz = GzDecoder::new(BufReader::new(File::open(&gz_path)?));
-        gz.read_to_end(&mut bytes)?;
-        bytes
-    };
-    let checksum = blake3::hash(&bytes).to_hex();
-
-    let lock_file = File::options()
-        .write(true)
-        .create(true)
-        .truncate(false)
-        .open(&lock_path)
-        .unwrap();
-    lock_file.lock().unwrap();
-
-    if ch_path.try_exists()?
-        && unpacked_path.try_exists()?
-        && let found_checksum = std::fs::read(&ch_path)?
-        && found_checksum == checksum.as_bytes()
-    {
-    } else {
-        std::fs::write(unpacked_path, &bytes)?;
-        std::fs::write(&ch_path, checksum.as_bytes())?;
-    }
-
-    lock_file.unlock().unwrap();
-
-    Ok(())
-}
+const KYTEA_MODEL_BIN: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/models/model.bin"
+));
+const KYTEA_MODEL_TXT: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/tests/models/model.txt"
+));
 
 #[test]
-fn tokenize() {
-    let model_path = {
-        let path = model_path();
-        setup_model(&path).unwrap();
-
-        &CString::new(path.as_os_str().as_encoded_bytes()).unwrap()
-    };
-
+fn tokenize_bin() {
     let mut model = KyTea::new();
 
     model
@@ -75,7 +20,14 @@ fn tokenize() {
         .set_word_bound(c" ")
         .set_input_format(CorpusFormat::Raw);
 
-    model.read_model(model_path, ModelFormat::Unknown).unwrap();
+    let model_content = KYTEA_MODEL_BIN.to_vec();
+    let mut model_stream = IspanStream::new(&model_content);
+
+    model
+        .read_model_from_stream(&mut model_stream, ModelFormat::Binary)
+        .unwrap();
+    drop(model_stream);
+    drop(model_content);
 
     let mut input = StringStream::new();
     input.push("すもももももももものうち．\n");
@@ -111,14 +63,7 @@ fn tokenize() {
 }
 
 #[test]
-fn tokenize_inmemory_model() {
-    let model_path = {
-        let path = model_path();
-        setup_model(&path).unwrap();
-
-        path
-    };
-
+fn tokenize_txt() {
     let mut model = KyTea::new();
 
     model
@@ -128,12 +73,14 @@ fn tokenize_inmemory_model() {
         .set_word_bound(c" ")
         .set_input_format(CorpusFormat::Raw);
 
-    let model_content = std::fs::read(&model_path).unwrap();
+    let model_content = KYTEA_MODEL_TXT.to_vec();
     let mut model_stream = IspanStream::new(&model_content);
 
     model
-        .read_model_from_stream(&mut model_stream, ModelFormat::Binary)
+        .read_model_from_stream(&mut model_stream, ModelFormat::Text)
         .unwrap();
+    drop(model_stream);
+    drop(model_content);
 
     let mut input = StringStream::new();
     input.push("すもももももももものうち．\n");
@@ -181,6 +128,14 @@ fn read_model_err() {
     assert!(
         model
             .read_model(c"./Cargo.toml", ModelFormat::Unknown)
+            .is_err()
+    );
+
+    let mut model = KyTea::new();
+    let mut model_stream = IspanStream::new(b"invalid model");
+    assert!(
+        model
+            .read_model_from_stream(&mut model_stream, ModelFormat::Text)
             .is_err()
     );
 }

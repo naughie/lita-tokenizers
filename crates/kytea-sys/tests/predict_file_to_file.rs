@@ -1,4 +1,4 @@
-use kytea_sys::{CorpusFormat, Fstream, KyTea, ModelFormat};
+use kytea_sys::{CorpusFormat, Fstream, KyTea};
 
 mod common;
 
@@ -11,11 +11,13 @@ fn path_to_cstr(path: &Path) -> CString {
 
 #[test]
 fn predict() {
-    let model_path = common::get_and_setup_model_path().unwrap();
-    let mut model = KyTea::new();
+    predict_impl(common::model_bin_file());
+    predict_impl(common::model_txt_file());
+    predict_impl(common::model_bin_span());
+    predict_impl(common::model_txt_span());
+}
 
-    model.read_model(&model_path, ModelFormat::Unknown).unwrap();
-
+fn predict_impl(mut model: KyTea) {
     model
         .config()
         .set_training(false)

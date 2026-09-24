@@ -15,7 +15,7 @@ lto = true
 strip = "symbols"
 
 [workspace.dependencies]
-kytea-sys = { path = "./crates/kytea-sys", version = "0.2.0" }
+kytea-sys = { path = "./crates/kytea-sys", version = "0.2.1" }
 mecab-sys = { path = "./crates/mecab-sys", version = "0.1.0" }
 
 tokenizers-core = { path = "./crates/lita-tokenizers-core", package = "lita-tokenizers-core", version = "0.1.0" }
