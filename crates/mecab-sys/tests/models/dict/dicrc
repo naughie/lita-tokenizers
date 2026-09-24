@@ -1,0 +1,3 @@
+cost-factor = 800
+bos-feature = BOS/EOS,BOS/EOS
+config-charset = utf-8

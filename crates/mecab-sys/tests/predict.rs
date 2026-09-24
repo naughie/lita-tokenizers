@@ -5,10 +5,7 @@ use std::path::{Path, PathBuf};
 
 fn model_path() -> PathBuf {
     let crate_root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    crate_root
-        .join("../../tests/mecab/dict")
-        .canonicalize()
-        .unwrap()
+    crate_root.join("tests/models/dict").canonicalize().unwrap()
 }
 
 fn build_mecab_arg(dict: &Path) -> CString {
@@ -38,15 +35,15 @@ fn predict() {
     }
 
     let mut expected = [
-        ": BOS/EOS,*,*,*,*,*,*,*,*",
-        "すもも: 名詞,一般,*,*,*,*,すもも,スモモ,スモモ",
-        "も: 助詞,係助詞,*,*,*,*,も,モ,モ",
-        "もも: 名詞,一般,*,*,*,*,もも,モモ,モモ",
-        "も: 助詞,係助詞,*,*,*,*,も,モ,モ",
-        "もも: 名詞,一般,*,*,*,*,もも,モモ,モモ",
-        "の: 助詞,連体化,*,*,*,*,の,ノ,ノ",
-        "うち: 名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ",
-        ": BOS/EOS,*,*,*,*,*,*,*,*",
+        ": BOS/EOS,BOS/EOS",
+        "すもも: 名詞,すもも",
+        "も: 助詞,も",
+        "もも: 名詞,もも",
+        "も: 助詞,も",
+        "もも: 名詞,もも",
+        "の: 助詞,の",
+        "うち: 名詞,うち",
+        ": BOS/EOS,BOS/EOS",
     ]
     .join("\n");
     expected.push('\n');

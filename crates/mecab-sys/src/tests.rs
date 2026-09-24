@@ -5,10 +5,7 @@ use std::path::{Path, PathBuf};
 
 fn dict_path() -> PathBuf {
     let crate_root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    crate_root
-        .join("../../tests/mecab/dict")
-        .canonicalize()
-        .unwrap()
+    crate_root.join("tests/models/dict").canonicalize().unwrap()
 }
 
 fn build_mecab_arg(dict: &Path) -> CString {
@@ -63,7 +60,7 @@ fn tokenize() {
             let mut feat = feat.split(',');
 
             let pos = feat.next().unwrap();
-            let reading = feat.nth(5).unwrap();
+            let reading = feat.next().unwrap();
 
             found.push((node.surface(), pos, reading));
             cursor.move_next();
