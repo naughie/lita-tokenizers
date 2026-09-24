@@ -1,6 +1,6 @@
 [package]
 name = "mecab-sys"
-version = "0.1.1"
+version = "0.1.2"
 
 description = "FFI binding and safe wrappers of MeCab"
 

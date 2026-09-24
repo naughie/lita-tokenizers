@@ -39,7 +39,7 @@ fn predict_impl(mut model: KyTea) {
     while ctx.predict().unwrap().is_continue() {}
     output.flush().unwrap();
 
-    let expected = "すもも/名詞/すもも も/助詞/も も/助詞/も も/助詞/も も/助詞/も も/助詞/も もの/名詞/もの うち/名詞/うち\n";
+    let expected = "すもも/名詞/すもも も/助詞/も もも/名詞/もも も/助詞/も もも/名詞/もも の/助詞/の うち/名詞/うち\n";
 
     assert_eq!(std::fs::read_to_string(&output_path).unwrap(), expected);
 }

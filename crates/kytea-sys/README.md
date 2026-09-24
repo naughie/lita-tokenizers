@@ -83,3 +83,24 @@ fn main() {
     println!("{}", std::fs::read_to_string("/path/to/output").unwrap());
 }
 ```
+
+## Tests
+
+We have tests against the minimal models that can parse the sentence `すもももももももものうち．`.
+
+The models, located at `tests/models/`, were trained as
+
+```
+$ echo 'すもも/名詞/すもも も/助詞/も もも/名詞/もも も/助詞/も もも/名詞/もも の/助詞/の うち/名詞/うち ．/補助記号/。' >train.txt
+$ train-kytea -full train.txt -charw 4 -model ./tests/models/model.bin
+$ train-kytea -full train.txt -charw 4 -modtext -model ./tests/models/model.txt
+```
+
+so that
+
+```
+$ echo "すもももももももものうち．" | kytea -model ./tests/models/model.bin
+すもも/名詞/すもも も/助詞/も もも/名詞/もも も/助詞/も もも/名詞/もも の/助詞/の うち/名詞/うち ．/補助記号/。
+$ echo "すもももももももものうち．" | kytea -model ./tests/models/model.txt
+すもも/名詞/すもも も/助詞/も もも/名詞/もも も/助詞/も もも/名詞/もも の/助詞/の うち/名詞/うち ．/補助記号/。
+```

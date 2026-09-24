@@ -26,7 +26,7 @@ fn predict_impl(mut model: KyTea) {
     let mut ctx = model.context(&mut input, &mut output).unwrap();
     while ctx.predict().unwrap().is_continue() {}
 
-    let expected = "すもも/名詞/すもも も/助詞/も も/助詞/も も/助詞/も も/助詞/も も/助詞/も もの/名詞/もの うち/名詞/うち\n";
+    let expected = "すもも/名詞/すもも も/助詞/も もも/名詞/もも も/助詞/も もも/名詞/もも の/助詞/の うち/名詞/うち\n";
 
     assert_eq!(String::from_utf8_lossy(output.as_bytes()), expected);
 }

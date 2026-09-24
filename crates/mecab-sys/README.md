@@ -57,3 +57,21 @@ fn main() {
     }
 }
 ```
+
+## Tests
+
+We have tests against the minimal models that can parse the sentence `すもももももももものうち．`:
+
+```
+$ mecab-dict-index -d ./tests/models/input -o ./tests/models/dict -f utf-8 -c utf-8
+$ mecab -d ./tests/models/dict
+すもも  名詞,すもも
+も      助詞,も
+もも    名詞,もも
+も      助詞,も
+もも    名詞,もも
+の      助詞,の
+うち    名詞,うち
+．      補助記号,。
+EOS
+```
