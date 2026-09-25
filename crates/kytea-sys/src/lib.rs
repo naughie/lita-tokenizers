@@ -66,6 +66,7 @@ mod tests;
 
 use std::ffi::CStr;
 use std::ffi::c_void;
+use std::fmt;
 use std::io::Error as IoError;
 use std::marker::PhantomData;
 use std::ops::ControlFlow;
@@ -145,6 +146,22 @@ pub enum TrainConfigError {
     /// Word segmentation is requested but no model is loaded.
     NoWordSegmentationModel,
 }
+
+impl fmt::Display for TrainConfigError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::DoNothing => write!(f, "no action is possible with the current configuration"),
+            Self::RawWithoutWordSegmentation => write!(
+                f,
+                "raw input format was selected but word segmentation is disabled"
+            ),
+            Self::NoWordSegmentationModel => {
+                write!(f, "word segmentation is requested but no model is loaded")
+            }
+        }
+    }
+}
+impl std::error::Error for TrainConfigError {}
 
 impl KyTea {
     /// Creates a new KyTea model instance.
@@ -462,7 +479,7 @@ pub trait Stream {
     fn as_stream(&mut self) -> IoStream<'_>;
 }
 
-impl<S: Stream> Stream for &mut S {
+impl<S: Stream + ?Sized> Stream for &mut S {
     fn as_stream(&mut self) -> IoStream<'_> {
         S::as_stream(self)
     }
