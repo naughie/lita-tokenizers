@@ -4,7 +4,8 @@
 
 #include <iostream>
 #include <span>
-#include <spanstream>
+// We do not include `spanstream` because it is not available in some environments yet
+// #include <spanstream>
 #include <sstream>
 #include <string_view>
 #include <fstream>
@@ -13,12 +14,31 @@
 #include <exception>
 #include <cstring>
 
-using std::iostream, std::fstream, std::stringstream, std::ispanstream;
+using std::iostream, std::fstream, std::stringstream;
 using std::exception;
 
 using kytea::Kytea, kytea::KyteaConfig, kytea::KyteaSentence;
 
 using kytea::CorpusIO, kytea::CorpusFormat, kytea::ModelIO;
+
+class ispanstream_buf_ : public std::streambuf {
+public:
+    explicit
+    ispanstream_buf_(std::span<const char> s) {
+        char* base = const_cast<char*>(s.data());
+        setg(base, base, base + s.size());
+    }
+};
+
+class ispanstream : public std::iostream {
+public:
+    explicit
+    ispanstream(std::span<const char> s)
+    : std::iostream(&buf_), buf_(s)
+    {}
+private:
+    ispanstream_buf_ buf_;
+};
 
 extern "C" {
     typedef struct {
