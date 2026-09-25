@@ -1,87 +1,74 @@
-# `@napi-rs/package-template`
+# lita-tokenizers-kytea-js
 
-![https://github.com/napi-rs/package-template/actions](https://github.com/napi-rs/package-template/workflows/CI/badge.svg)
+KyTea bindings for Node.js.
 
-> Template project for writing node packages with napi-rs.
 
-# Usage
+## Usage
 
-1. Click **Use this template**.
-2. **Clone** your project.
-3. Run `yarn install` to install dependencies.
-4. Run `yarn napi rename -n [@your-scope/package-name] -b [binary-name]` command under the project folder to rename your package.
+Install via npm:
 
-## Install this test package
-
-```bash
-yarn add @napi-rs/package-template
+```
+$ npm install lita-tokenizers-kytea-js
 ```
 
-## Ability
+Then you can use `KyTea` for performing the morphological analysis.
 
-### Build
+```javascript
+import { KyTea, StringStream } from "lita-tokenizers-kytea-js";
 
-After `yarn build/npm run build` command, you can see `package-template.[darwin|win32|linux].node` file in project root. This is the native addon built from [lib.rs](./src/lib.rs).
+const main = () => {
+  const model = new KyTea();
+  model.readModel("/path/to/model.bin");
 
-### Test
+  const input = new StringStream("すもももももももものうち");
+  const output = new StringStream();
 
-With [ava](https://github.com/avajs/ava), run `yarn test/npm run test` to testing native addon. You can also switch to another testing framework if you want.
+  model.tokenize(input, output);
+  console.log(output.asStr());
+};
 
-### CI
-
-With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@20`, `@node22`] x [`macOS`, `Linux`, `Windows`] matrix. You will never be afraid of the native addon broken in these platforms.
-
-### Release
-
-Release native package is very difficult in old days. Native packages may ask developers who use it to install `build toolchain` like `gcc/llvm`, `node-gyp` or something more.
-
-With `GitHub actions`, we can easily prebuild a `binary` for major platforms. And with `N-API`, we should never be afraid of **ABI Compatible**.
-
-The other problem is how to deliver prebuild `binary` to users. Downloading it in `postinstall` script is a common way that most packages do it right now. The problem with this solution is it introduced many other packages to download binary that has not been used by `runtime codes`. The other problem is some users may not easily download the binary from `GitHub/CDN` if they are behind a private network (But in most cases, they have a private NPM mirror).
-
-In this package, we choose a better way to solve this problem. We release different `npm packages` for different platforms. And add it to `optionalDependencies` before releasing the `Major` package to npm.
-
-`NPM` will choose which native package should download from `registry` automatically. You can see [npm](./npm) dir for details. And you can also run `yarn add @napi-rs/package-template` to see how it works.
-
-## Develop requirements
-
-- Install the latest `Rust`
-- Install `Node.js@10+` which fully supported `Node-API`
-- Install `yarn@1.x`
-
-## Test in local
-
-- yarn
-- yarn build
-- yarn test
-
-And you will see:
-
-```bash
-$ ava --verbose
-
-  ✔ sync function from native code
-  ✔ sleep function from native code (201ms)
-  ─
-
-  2 tests passed
-✨  Done in 1.12s.
+main();
 ```
 
-## Release package
+Both the input and the output are allowed to be files:
 
-Ensure you have set your **NPM_TOKEN** in the `GitHub` project setting.
+```javascript
+import { FileStream, KyTea } from "lita-tokenizers-kytea-js";
 
-In `Settings -> Secrets`, add **NPM_TOKEN** into it.
+const main = () => {
+  const model = new KyTea();
+  model.readModel("/path/to/model.bin");
 
-When you want to release the package:
+  # it accepts three modes:
+  # "r" (read-only), "w" (write-only, truncate), "a" (write-only, append)
+  const input = new FileStream("./input.txt", "r");
+  const output = new FileStream("./output.txt", "w");
 
-```bash
-npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease [--preid=<prerelease-id>] | from-git]
+  model.tokenize(input, output);
+  output.flush();
+};
 
-git push
+main();
 ```
 
-GitHub actions will do the rest job for you.
+Also, the model itself can be loaded before calling `readModel()`:
 
-> WARN: Don't run `npm publish` manually.
+```javascript
+import { readFileSync } from "node:fs"
+import { KyTea, StringStream } from "lita-tokenizers-kytea-js";
+
+const main = () => {
+  const model = new KyTea();
+  # "b": binary model
+  # "t": text model
+  model.readModelFromBytes(readFileSync("/path/to/model.bin"), "b");
+
+  const input = new StringStream("すもももももももものうち");
+  const output = new StringStream();
+
+  model.tokenize(input, output);
+  console.log(output.asStr());
+};
+
+main();
+```

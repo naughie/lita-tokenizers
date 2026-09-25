@@ -1,7 +1,7 @@
 {
   "name": "lita-tokenizers-kytea-js",
   "version": "1.0.0",
-  "description": "",
+  "description": "KyTea bindings for Node.js",
   "main": "index.js",
   "type": "module",
   "repository": {
