@@ -528,7 +528,7 @@ impl StringStream {
     pub fn push(&mut self, input: &str) {
         unsafe {
             let input = ffi::Str {
-                ptr: input.as_ptr() as *const i8,
+                ptr: input.as_ptr() as *const _,
                 size: input.len(),
             };
             ffi::kytea_stringstream_write(self.inner, input);
@@ -658,7 +658,7 @@ impl<'a> IspanStream<'a> {
     /// Creates a new empty [`IspanStream`].
     pub fn new(buf: &'a [u8]) -> Self {
         unsafe {
-            let inner = ffi::kytea_ispanstream_new(buf.as_ptr() as *const i8, buf.len());
+            let inner = ffi::kytea_ispanstream_new(buf.as_ptr() as *const _, buf.len());
             debug_assert!(!inner.is_null());
             Self {
                 inner,
